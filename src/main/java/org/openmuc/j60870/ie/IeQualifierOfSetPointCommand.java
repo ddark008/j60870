@@ -20,13 +20,14 @@
  */
 package org.openmuc.j60870.ie;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
 /**
  * Represents a qualifier of set-point command (QOS) information element.
  */
-public class IeQualifierOfSetPointCommand extends InformationElement {
+public class IeQualifierOfSetPointCommand extends InformationElement implements StreamEncode {
 
     private final int ql;
     private final boolean select;
@@ -49,6 +50,15 @@ public class IeQualifierOfSetPointCommand extends InformationElement {
             buffer[i] |= 0x80;
         }
         return 1;
+    }
+
+    @Override
+    public void encode(ByteArrayOutputStream bOutput) {
+        byte temp_val = (byte) ql;
+        if (select) {
+            temp_val |= 0x80;
+        }
+        bOutput.write(temp_val);
     }
 
     public int getQl() {

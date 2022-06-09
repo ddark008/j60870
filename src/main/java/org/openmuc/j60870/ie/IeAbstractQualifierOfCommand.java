@@ -20,10 +20,11 @@
  */
 package org.openmuc.j60870.ie;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-abstract class IeAbstractQualifierOfCommand extends InformationElement {
+abstract class IeAbstractQualifierOfCommand extends InformationElement implements StreamEncode {
 
     protected int value;
 
@@ -49,6 +50,11 @@ abstract class IeAbstractQualifierOfCommand extends InformationElement {
     int encode(byte[] buffer, int i) {
         buffer[i] = (byte) value;
         return 1;
+    }
+
+    @Override
+    public void encode(ByteArrayOutputStream bOutput) {
+        bOutput.write((byte) value);
     }
 
     /**

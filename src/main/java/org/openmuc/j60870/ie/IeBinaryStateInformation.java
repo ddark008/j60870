@@ -20,6 +20,7 @@
  */
 package org.openmuc.j60870.ie;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
@@ -28,7 +29,7 @@ import javax.xml.bind.DatatypeConverter;
 /**
  * Represents a binary state information (BSI) information element.
  */
-public class IeBinaryStateInformation extends InformationElement {
+public class IeBinaryStateInformation extends InformationElement implements StreamEncode {
 
     private final int value;
 
@@ -68,6 +69,14 @@ public class IeBinaryStateInformation extends InformationElement {
         buffer[i++] = (byte) (value >> 8);
         buffer[i] = (byte) value;
         return 4;
+    }
+
+    @Override
+    public void encode(ByteArrayOutputStream bOutput) {
+        bOutput.write((byte) (value >> 24));
+        bOutput.write((byte) (value >> 16));
+        bOutput.write((byte) (value >> 8));
+        bOutput.write((byte) value);
     }
 
     /**
@@ -112,5 +121,6 @@ public class IeBinaryStateInformation extends InformationElement {
         return "BinaryStateInformation (32 bits as hex): " + DatatypeConverter.printHexBinary(
                 new byte[] { (byte) (value >> 24), (byte) (value >> 16), (byte) (value >> 8), (byte) (value) });
     }
+
 
 }

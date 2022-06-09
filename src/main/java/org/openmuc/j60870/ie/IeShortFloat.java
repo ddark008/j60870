@@ -20,13 +20,14 @@
  */
 package org.openmuc.j60870.ie;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
 /**
  * Represents a short floating point number (R32-IEEE STD 754) information element.
  */
-public class IeShortFloat extends InformationElement {
+public class IeShortFloat extends InformationElement implements StreamEncode {
 
     private final float value;
 
@@ -51,6 +52,15 @@ public class IeShortFloat extends InformationElement {
         return 4;
     }
 
+    @Override
+    public void encode(ByteArrayOutputStream bOutput) {
+        int tempVal = Float.floatToIntBits(value);
+        bOutput.write((byte) tempVal);
+        bOutput.write((byte) tempVal >> 8);
+        bOutput.write((byte) tempVal >> 16);
+        bOutput.write((byte) tempVal >> 24);
+    }
+
     public float getValue() {
         return value;
     }
@@ -59,4 +69,6 @@ public class IeShortFloat extends InformationElement {
     public String toString() {
         return "Short float value: " + value;
     }
+
+
 }

@@ -22,6 +22,7 @@ package org.openmuc.j60870.ie;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.openmuc.j60870.ASduType;
 import org.openmuc.j60870.internal.ExtendedDataInputStream;
@@ -490,4 +491,21 @@ public class InformationObject {
 
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        InformationObject that = (InformationObject) o;
+
+        if (informationObjectAddress != that.informationObjectAddress) return false;
+        return Arrays.deepEquals(informationElements, that.informationElements);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = informationObjectAddress;
+        result = 31 * result + Arrays.deepHashCode(informationElements);
+        return result;
+    }
 }

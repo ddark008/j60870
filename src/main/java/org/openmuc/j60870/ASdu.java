@@ -22,6 +22,7 @@ package org.openmuc.j60870;
 
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.Arrays;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -351,4 +352,38 @@ public class ASdu {
 
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ASdu aSdu = (ASdu) o;
+
+        if (isSequenceOfElements != aSdu.isSequenceOfElements) return false;
+        if (test != aSdu.test) return false;
+        if (negativeConfirm != aSdu.negativeConfirm) return false;
+        if (originatorAddress != aSdu.originatorAddress) return false;
+        if (commonAddress != aSdu.commonAddress) return false;
+        if (sequenceLength != aSdu.sequenceLength) return false;
+        if (aSduType != aSdu.aSduType) return false;
+        if (causeOfTransmission != aSdu.causeOfTransmission) return false;
+        // Probably incorrect - comparing Object[] arrays with Arrays.equals
+        if (!Arrays.equals(informationObjects, aSdu.informationObjects)) return false;
+        return Arrays.equals(privateInformation, aSdu.privateInformation);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = aSduType.hashCode();
+        result = 31 * result + (isSequenceOfElements ? 1 : 0);
+        result = 31 * result + causeOfTransmission.hashCode();
+        result = 31 * result + (test ? 1 : 0);
+        result = 31 * result + (negativeConfirm ? 1 : 0);
+        result = 31 * result + originatorAddress;
+        result = 31 * result + commonAddress;
+        result = 31 * result + Arrays.hashCode(informationObjects);
+        result = 31 * result + Arrays.hashCode(privateInformation);
+        result = 31 * result + sequenceLength;
+        return result;
+    }
 }

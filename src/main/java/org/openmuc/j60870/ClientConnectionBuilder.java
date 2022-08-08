@@ -125,6 +125,19 @@ public class ClientConnectionBuilder extends CommonBuilder<ClientConnectionBuild
     }
 
     /**
+     * Sets the local (client) address and port the socket will connect to.
+     *
+     * @param address
+     *            the local address the socket is bound to, or null for any local address.
+     * @param port
+     *            the local port the socket is bound to or zero for a system selected free port.
+     * @return this builder
+     */
+    public ClientConnectionBuilder setLocalAddress(String address, int port) throws UnknownHostException {
+        return setLocalAddress(InetAddress.getByName(address), port);
+    }
+
+    /**
      * Sets connection time out t0, in milliseconds.
      * 
      * @param time

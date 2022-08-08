@@ -323,12 +323,9 @@ public class Connection implements AutoCloseable {
             handleReceiveSequenceNumber(aPdu.getReceiveSeqNumber());
 
             if (aSduListener != null) {
-                executor.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        Thread.currentThread().setName("aSduListener");
-                        aSduListener.newASdu(aPdu.getASdu());
-                    }
+                executor.execute(() -> {
+                    Thread.currentThread().setName("aSduListener");
+                    aSduListener.newASdu(aPdu.getASdu());
                 });
             }
 
@@ -788,14 +785,11 @@ public class Connection implements AutoCloseable {
 
     private CauseOfTransmission cotFrom(ASdu aSdu) {
         CauseOfTransmission cot = aSdu.getCauseOfTransmission();
-        switch (cot) {
-        case ACTIVATION:
-            return CauseOfTransmission.ACTIVATION_CON;
-        case DEACTIVATION:
-            return CauseOfTransmission.DEACTIVATION_CON;
-        default:
-            return cot;
-        }
+        return switch (cot) {
+            case ACTIVATION -> CauseOfTransmission.ACTIVATION_CON;
+            case DEACTIVATION -> CauseOfTransmission.DEACTIVATION_CON;
+            default -> cot;
+        };
     }
 
     /**
@@ -1428,6 +1422,10 @@ public class Connection implements AutoCloseable {
                 originatorAddress, commonAddress,
                 new InformationObject(informationObjectAddress, nameOfFile, rangeStartTime, rangeEndTime));
         send(aSdu);
+    }
+
+    public String getServerInformation(){
+        return socket.getInetAddress().toString() + ":" + socket.getPort();
     }
 
 }

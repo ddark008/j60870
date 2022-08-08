@@ -470,7 +470,9 @@ public class InformationObject {
         if (informationElements.length > 1) {
             int i = 1;
             for (InformationElement[] informationElementSet : informationElements) {
-                builder.append("\nInformation Element Set " + i + ":");
+                builder.append("\nInformation Element Set ");
+                builder.append(i);
+                builder.append(":");
                 for (InformationElement informationElement : informationElementSet) {
                     builder.append("\n");
                     builder.append(informationElement.toString());

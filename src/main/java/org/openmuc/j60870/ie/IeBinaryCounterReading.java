@@ -25,6 +25,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.EnumSet;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Set;
 
 import org.openmuc.j60870.internal.ExtendedDataInputStream;
@@ -129,5 +130,25 @@ public class IeBinaryCounterReading extends InformationElement {
     @Override
     public String toString() {
         return "Binary counter reading: " + counterReading + ", seq num: " + sequenceNumber + ", flags: " + flags;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IeBinaryCounterReading that = (IeBinaryCounterReading) o;
+
+        if (counterReading != that.counterReading) return false;
+        if (sequenceNumber != that.sequenceNumber) return false;
+        return Objects.equals(flags, that.flags);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = counterReading;
+        result = 31 * result + sequenceNumber;
+        result = 31 * result + (flags != null ? flags.hashCode() : 0);
+        return result;
     }
 }

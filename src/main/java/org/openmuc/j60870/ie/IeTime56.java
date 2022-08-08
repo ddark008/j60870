@@ -26,6 +26,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Objects;
 import java.util.TimeZone;
 
 /**
@@ -313,5 +314,23 @@ public class IeTime56 extends InformationElement {
         }
 
         return builder.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IeTime56 ieTime56 = (IeTime56) o;
+
+        if (!Arrays.equals(value, ieTime56.value)) return false;
+        return Objects.equals(timeZone, ieTime56.timeZone);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Arrays.hashCode(value);
+        result = 31 * result + (timeZone != null ? timeZone.hashCode() : 0);
+        return result;
     }
 }

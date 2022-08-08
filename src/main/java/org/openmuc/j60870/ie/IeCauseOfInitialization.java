@@ -86,4 +86,22 @@ public class IeCauseOfInitialization extends InformationElement {
     public String toString() {
         return "Cause of initialization: " + value + ", init after parameter change: " + initAfterParameterChange;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IeCauseOfInitialization that = (IeCauseOfInitialization) o;
+
+        if (value != that.value) return false;
+        return initAfterParameterChange == that.initAfterParameterChange;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = value;
+        result = 31 * result + (initAfterParameterChange ? 1 : 0);
+        return result;
+    }
 }

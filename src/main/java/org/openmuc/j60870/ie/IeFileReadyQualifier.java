@@ -66,4 +66,21 @@ public class IeFileReadyQualifier extends InformationElement {
         return "File ready qualifier: " + value + ", negative confirm: " + negativeConfirm;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IeFileReadyQualifier that = (IeFileReadyQualifier) o;
+
+        if (value != that.value) return false;
+        return negativeConfirm == that.negativeConfirm;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = value;
+        result = 31 * result + (negativeConfirm ? 1 : 0);
+        return result;
+    }
 }

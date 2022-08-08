@@ -22,6 +22,7 @@ package org.openmuc.j60870.ie;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Calendar;
 
 /**
@@ -68,5 +69,20 @@ public class IeTime16 extends InformationElement {
     @Override
     public String toString() {
         return "Time16, time in ms: " + getTimeInMs();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IeTime16 ieTime16 = (IeTime16) o;
+
+        return Arrays.equals(value, ieTime16.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(value);
     }
 }

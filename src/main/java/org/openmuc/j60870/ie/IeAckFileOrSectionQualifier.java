@@ -62,4 +62,22 @@ public class IeAckFileOrSectionQualifier extends InformationElement {
     public String toString() {
         return String.format("Acknowledge file or section qualifier, action: %d, notice: %d.", action, notice);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IeAckFileOrSectionQualifier that = (IeAckFileOrSectionQualifier) o;
+
+        if (action != that.action) return false;
+        return notice == that.notice;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = action;
+        result = 31 * result + notice;
+        return result;
+    }
 }

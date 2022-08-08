@@ -52,4 +52,19 @@ public class IeLastSectionOrSegmentQualifier extends InformationElement {
     public String toString() {
         return "Last section or segment qualifier: " + value;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IeLastSectionOrSegmentQualifier that = (IeLastSectionOrSegmentQualifier) o;
+
+        return value == that.value;
+    }
+
+    @Override
+    public int hashCode() {
+        return value;
+    }
 }

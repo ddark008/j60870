@@ -82,4 +82,18 @@ public class IeProtectionOutputCircuitInformation extends InformationElement {
                 + isCommandToL1() + ", command to L2: " + isCommandToL2() + ", command to L3: " + isCommandToL3();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IeProtectionOutputCircuitInformation that = (IeProtectionOutputCircuitInformation) o;
+
+        return value == that.value;
+    }
+
+    @Override
+    public int hashCode() {
+        return value;
+    }
 }

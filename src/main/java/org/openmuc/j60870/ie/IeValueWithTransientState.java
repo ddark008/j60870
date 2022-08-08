@@ -92,4 +92,22 @@ public class IeValueWithTransientState extends InformationElement {
         return MessageFormat.format("Value with transient state, value: {0}, transient state: {1}.", getValue(),
                 getTransientState());
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IeValueWithTransientState that = (IeValueWithTransientState) o;
+
+        if (value != that.value) return false;
+        return transientState == that.transientState;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = value;
+        result = 31 * result + (transientState ? 1 : 0);
+        return result;
+    }
 }

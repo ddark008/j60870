@@ -74,4 +74,24 @@ public class IeQualifierOfParameterOfMeasuredValues extends InformationElement {
         return "Qualifier of parameter of measured values, kind of parameter: " + kindOfParameter + ", change: "
                 + change + ", not in operation: " + notInOperation;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IeQualifierOfParameterOfMeasuredValues that = (IeQualifierOfParameterOfMeasuredValues) o;
+
+        if (kindOfParameter != that.kindOfParameter) return false;
+        if (change != that.change) return false;
+        return notInOperation == that.notInOperation;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = kindOfParameter;
+        result = 31 * result + (change ? 1 : 0);
+        result = 31 * result + (notInOperation ? 1 : 0);
+        return result;
+    }
 }

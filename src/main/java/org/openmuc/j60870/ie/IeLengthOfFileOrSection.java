@@ -61,4 +61,19 @@ public class IeLengthOfFileOrSection extends InformationElement {
     public String toString() {
         return "Length of file or section: " + value;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IeLengthOfFileOrSection that = (IeLengthOfFileOrSection) o;
+
+        return value == that.value;
+    }
+
+    @Override
+    public int hashCode() {
+        return value;
+    }
 }

@@ -98,4 +98,19 @@ public class IeNormalizedValue extends InformationElement {
     public String toString() {
         return "Normalized value: " + ((double) value / 32768);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IeNormalizedValue that = (IeNormalizedValue) o;
+
+        return value == that.value;
+    }
+
+    @Override
+    public int hashCode() {
+        return value;
+    }
 }

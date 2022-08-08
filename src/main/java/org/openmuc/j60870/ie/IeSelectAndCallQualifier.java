@@ -62,4 +62,22 @@ public class IeSelectAndCallQualifier extends InformationElement {
     public String toString() {
         return "Select and call qualifier, action: " + action + ", notice: " + notice;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IeSelectAndCallQualifier that = (IeSelectAndCallQualifier) o;
+
+        if (action != that.action) return false;
+        return notice == that.notice;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = action;
+        result = 31 * result + notice;
+        return result;
+    }
 }

@@ -52,4 +52,19 @@ public class IeQualifierOfParameterActivation extends InformationElement {
     public String toString() {
         return "Qualifier of parameter activation: " + value;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IeQualifierOfParameterActivation that = (IeQualifierOfParameterActivation) o;
+
+        return value == that.value;
+    }
+
+    @Override
+    public int hashCode() {
+        return value;
+    }
 }

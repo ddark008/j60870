@@ -24,6 +24,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -98,5 +99,23 @@ public class IeStatusOfFile extends InformationElement {
         return "Status of file: " + status + ", last file of directory: " + flags.contains(Flag.LAST_FILE_OF_DIRECTORY)
                 + ", name defines directory: " + flags.contains(Flag.NAME_DEFINES_DIRECTORY) + ", transfer is active: "
                 + flags.contains(Flag.TRANSFER_IS_ACTIVE);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IeStatusOfFile that = (IeStatusOfFile) o;
+
+        if (status != that.status) return false;
+        return Objects.equals(flags, that.flags);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = status;
+        result = 31 * result + (flags != null ? flags.hashCode() : 0);
+        return result;
     }
 }

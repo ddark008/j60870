@@ -63,4 +63,18 @@ public class IeTestSequenceCounter extends InformationElement {
         return "Test sequence counter: " + getValue();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IeTestSequenceCounter that = (IeTestSequenceCounter) o;
+
+        return value == that.value;
+    }
+
+    @Override
+    public int hashCode() {
+        return value;
+    }
 }

@@ -75,4 +75,18 @@ abstract class IeAbstractQualifierOfCommand extends InformationElement implement
         return "selected: " + isSelect() + ", qualifier: " + getQualifier();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IeAbstractQualifierOfCommand that = (IeAbstractQualifierOfCommand) o;
+
+        return value == that.value;
+    }
+
+    @Override
+    public int hashCode() {
+        return value;
+    }
 }

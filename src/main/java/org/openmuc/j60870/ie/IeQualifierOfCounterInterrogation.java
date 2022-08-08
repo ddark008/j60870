@@ -60,4 +60,22 @@ public class IeQualifierOfCounterInterrogation extends InformationElement {
     public String toString() {
         return "Qualifier of counter interrogation, request: " + request + ", freeze: " + freeze;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IeQualifierOfCounterInterrogation that = (IeQualifierOfCounterInterrogation) o;
+
+        if (request != that.request) return false;
+        return freeze == that.freeze;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = request;
+        result = 31 * result + freeze;
+        return result;
+    }
 }

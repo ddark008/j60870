@@ -97,4 +97,18 @@ public class IeProtectionStartEvent extends InformationElement {
                 + isStartOperationIe() + ", start of operation in reverse direction: " + isStartReverseOperation();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IeProtectionStartEvent that = (IeProtectionStartEvent) o;
+
+        return value == that.value;
+    }
+
+    @Override
+    public int hashCode() {
+        return value;
+    }
 }

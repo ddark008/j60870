@@ -52,4 +52,19 @@ public class IeQualifierOfResetProcessCommand extends InformationElement {
     public String toString() {
         return "Qualifier of reset process command: " + value;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IeQualifierOfResetProcessCommand that = (IeQualifierOfResetProcessCommand) o;
+
+        return value == that.value;
+    }
+
+    @Override
+    public int hashCode() {
+        return value;
+    }
 }

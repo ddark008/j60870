@@ -73,4 +73,22 @@ public class IeQualifierOfSetPointCommand extends InformationElement implements 
     public String toString() {
         return "Qualifier of set point command, QL: " + ql + ", select: " + select;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IeQualifierOfSetPointCommand that = (IeQualifierOfSetPointCommand) o;
+
+        if (ql != that.ql) return false;
+        return select == that.select;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = ql;
+        result = 31 * result + (select ? 1 : 0);
+        return result;
+    }
 }

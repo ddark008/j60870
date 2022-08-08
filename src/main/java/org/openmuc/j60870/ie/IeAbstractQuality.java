@@ -88,4 +88,19 @@ abstract class IeAbstractQuality extends InformationElement implements StreamEnc
         return MessageFormat.format("blocked: {0}, substituted: {1}, not topical: {2}, invalid: {3}", isBlocked(),
                 isSubstituted(), isNotTopical(), isInvalid());
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IeAbstractQuality that = (IeAbstractQuality) o;
+
+        return value == that.value;
+    }
+
+    @Override
+    public int hashCode() {
+        return value;
+    }
 }

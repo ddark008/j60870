@@ -64,4 +64,22 @@ public class IeSectionReadyQualifier extends InformationElement {
     public String toString() {
         return "Section ready qualifier: " + value + ", section not ready: " + sectionNotReady;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IeSectionReadyQualifier that = (IeSectionReadyQualifier) o;
+
+        if (value != that.value) return false;
+        return sectionNotReady == that.sectionNotReady;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = value;
+        result = 31 * result + (sectionNotReady ? 1 : 0);
+        return result;
+    }
 }

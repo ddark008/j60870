@@ -51,7 +51,7 @@ import org.openmuc.j60870.internal.ExtendedDataInputStream;
  * <li>A list of Information Objects containing the actual actual data in the form of Information Elements.</li>
  * </ul>
  */
-public class ASdu {
+public class ASdu implements Cloneable {
 
     private final ASduType aSduType;
     private final boolean isSequenceOfElements;
@@ -385,5 +385,20 @@ public class ASdu {
         result = 31 * result + Arrays.hashCode(privateInformation);
         result = 31 * result + sequenceLength;
         return result;
+    }
+
+    /**
+     * Returns a shallow copy of this {@code ASdu} instance.  (The
+     * elements themselves are not copied.)
+     *
+     * @return a clone of this {@code ASdu} instance
+     */
+    public Object clone() {
+        try {
+            return super.clone();
+        } catch (CloneNotSupportedException e) {
+            // this shouldn't happen, since we are Cloneable
+            throw new InternalError(e);
+        }
     }
 }

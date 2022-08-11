@@ -56,9 +56,9 @@ public class IeShortFloat extends InformationElement implements StreamEncode {
     public void encode(ByteArrayOutputStream bOutput) {
         int tempVal = Float.floatToIntBits(value);
         bOutput.write((byte) tempVal);
-        bOutput.write((byte) tempVal >> 8);
-        bOutput.write((byte) tempVal >> 16);
-        bOutput.write((byte) tempVal >> 24);
+        bOutput.write((byte) (tempVal >> 8));
+        bOutput.write((byte) (tempVal >> 16));
+        bOutput.write((byte) (tempVal >> 24));
     }
 
     public float getValue() {

@@ -46,7 +46,7 @@ class TimeoutManager implements Runnable {
 
     private void removeDuplicates(TimeoutTask task) {
         while (queue.remove(task)) {
-            ;
+
         }
     }
 

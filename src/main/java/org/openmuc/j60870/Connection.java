@@ -25,7 +25,9 @@ import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.text.MessageFormat;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -62,6 +64,7 @@ import org.openmuc.j60870.ie.IeTime16;
 import org.openmuc.j60870.ie.IeTime56;
 import org.openmuc.j60870.ie.InformationElement;
 import org.openmuc.j60870.ie.InformationObject;
+import org.openmuc.j60870.internal.SerialExecutor;
 
 /**
  * Represents an open connection to a specific 60870 server. It is created either through an instance of
@@ -121,6 +124,7 @@ public class Connection implements AutoCloseable {
     private CountDownLatch stopdtConSignal;
 
     private final ExecutorService executor;
+    private final SerialExecutor serialExecutor;
 
     /** Time-out for acknowledges in case of no data messages t2 < t1 (t2: default 10) */
     private class MaxTimeNoAckSentTimer extends TimeoutTask {
@@ -206,11 +210,11 @@ public class Connection implements AutoCloseable {
 
                         switch (aPdu.getApciType()) {
                         case I_FORMAT:
-                            closeIfStopped();
+                            closeIfStopped(aPdu.getApciType());
                             handleIFrame(aPdu);
                             break;
                         case S_FORMAT:
-                            closeIfStopped();
+                            closeIfStopped(aPdu.getApciType());
                             handleReceiveSequenceNumber(aPdu.getReceiveSeqNumber());
                             break;
                         case STARTDT_CON:
@@ -246,7 +250,7 @@ public class Connection implements AutoCloseable {
                     }
                 }
             } catch (EOFException e) {
-                closedIOException = new IOException("Connection was closed by server.", e);
+                closedIOException = new EOFException("Connection was closed by remote.");
             } catch (IOException e) {
                 closedIOException = e;
             } catch (Exception e) {
@@ -269,11 +273,12 @@ public class Connection implements AutoCloseable {
             os.flush();
         }
 
-        private void closeIfStopped() {
+        private void closeIfStopped(ApciType apciType) {
             if (serverThread != null && stopped) {
                 close();
                 if (aSduListenerBack != null) {
-                    aSduListenerBack.connectionClosed(new IOException("Got S/I-Format message while STOPDT state."));
+                    aSduListenerBack
+                            .connectionClosed(new IOException("Got " + apciType + " message while STOPDT state."));
                 }
             }
         }
@@ -292,11 +297,11 @@ public class Connection implements AutoCloseable {
             synchronized (this) {
                 os.write(STOPDT_CON_BUFFER);
 
+                setStopped(true);
                 if (aSduListener != null) {
                     aSduListenerBack = aSduListener;
                     aSduListener = null;
                 }
-                stopped = true;
             }
             os.flush();
         }
@@ -309,7 +314,7 @@ public class Connection implements AutoCloseable {
                 if (aSduListener == null) {
                     aSduListener = aSduListenerBack;
                 }
-                stopped = false;
+                setStopped(false);
             }
             os.flush();
 
@@ -323,9 +328,12 @@ public class Connection implements AutoCloseable {
             handleReceiveSequenceNumber(aPdu.getReceiveSeqNumber());
 
             if (aSduListener != null) {
-                executor.execute(() -> {
-                    Thread.currentThread().setName("aSduListener");
-                    aSduListener.newASdu(aPdu.getASdu());
+                serialExecutor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        Thread.currentThread().setName("aSduListener");
+                        aSduListener.newASdu(aPdu.getASdu());
+                    }
                 });
             }
 
@@ -391,8 +399,8 @@ public class Connection implements AutoCloseable {
                     timeoutManager.addTimerTask(maxTimeNoAckReceived);
                 }
             }
+            Connection.this.notifyAll();
         }
-
     }
 
     Connection(Socket socket, ServerThread serverThread, ConnectionSettings settings) throws IOException {
@@ -423,8 +431,9 @@ public class Connection implements AutoCloseable {
             this.executor = ConnectionSettings.getThreadPool();
         }
         else {
-            this.executor = Executors.newFixedThreadPool(2);
+            this.executor = Executors.newCachedThreadPool();
         }
+        serialExecutor = new SerialExecutor(executor);
         ConnectionSettings.incremntConnectionsCounter();
 
         this.timeoutManager = new TimeoutManager();
@@ -457,8 +466,15 @@ public class Connection implements AutoCloseable {
 
         synchronized (this) {
             aSduListenerBack = aSduListener;
+            setStopped(true);
             aSduListener = null;
-            stopped = true;
+        }
+    }
+
+    private void setStopped(boolean stopped) {
+        this.stopped = stopped;
+        if (aSduListener != null) {
+            this.aSduListener.dataTransferStateChanged(stopped);
         }
     }
 
@@ -512,7 +528,7 @@ public class Connection implements AutoCloseable {
 
         synchronized (this) {
             this.aSduListener = listener;
-            stopped = false;
+            setStopped(false);
         }
     }
 
@@ -547,7 +563,7 @@ public class Connection implements AutoCloseable {
 
         synchronized (this) {
             this.aSduListener = listener;
-            stopped = false;
+            setStopped(false);
         }
     }
 
@@ -606,7 +622,7 @@ public class Connection implements AutoCloseable {
 
         synchronized (this) {
             this.aSduListener = listener;
-            stopped = false;
+            setStopped(false);
         }
 
         resetMaxIdleTimeTimer();
@@ -664,6 +680,9 @@ public class Connection implements AutoCloseable {
             return;
         }
 
+        acknowledgedSendSequenceNumber = sendSequenceNumber;
+        notifyAll();
+
         try {
             // close the socket, which also closes the streams
             socket.close();
@@ -700,10 +719,15 @@ public class Connection implements AutoCloseable {
 
         while (getNumUnconfirmedAPdusSent() >= settings.getMaxNumOfOutstandingIPdus()) {
             try {
-                this.wait(1);
+                System.out.println("Ich Warte auf den Bus!");
+                this.wait();
             } catch (InterruptedException e) {
                 throw new IOException(e);
             }
+        }
+
+        if (closed) {
+            throw new IOException("connection closed");
         }
 
         acknowledgedReceiveSequenceNumber = receiveSequenceNumber;
@@ -750,7 +774,7 @@ public class Connection implements AutoCloseable {
      *             if a fatal communication error occurred.
      */
     public void sendConfirmation(ASdu aSdu) throws IOException {
-        sendConfirmation(aSdu, aSdu.getCommonAddress());
+        sendConfirmation(aSdu, aSdu.getCommonAddress(), false);
     }
 
     /**
@@ -765,10 +789,88 @@ public class Connection implements AutoCloseable {
      *             if a fatal communication error occurred.
      */
     public void sendConfirmation(ASdu aSdu, int stationAddress) throws IOException {
-        CauseOfTransmission cot = cotFrom(aSdu);
-        int commonAddress = aSdu.getCommonAddress();
-        int broadcastAddress;
+        sendConfirmation(aSdu, stationAddress, false);
+    }
 
+    /**
+     * Send response with given aSdu. Given station address is used as Common ASDU Address, if we response to broadcast
+     * else given Common ASDU Address of aSdu.
+     * 
+     * @param aSdu
+     *            ASDU which response to
+     * @param stationAddress
+     *            address of this station
+     * @param isNegativeConfirm
+     *            true if it is a negative confirmation
+     * @throws IOException
+     *             if a fatal communication error occurred.
+     */
+    public void sendConfirmation(ASdu aSdu, int stationAddress, boolean isNegativeConfirm) throws IOException {
+        CauseOfTransmission cot = cotFrom(aSdu);
+        sendActDect(aSdu, stationAddress, cot, isNegativeConfirm);
+    }
+
+    /**
+     * Send response with given aSdu. Given station address is used as Common ASDU Address, if we response to broadcast
+     * else given Common ASDU Address of aSdu.
+     * 
+     * @param aSdu
+     *            ASDU which response to
+     * @param stationAddress
+     *            address of this station
+     * @param isNegativeConfirm
+     *            true if it is a negative confirmation
+     * @param cot
+     *            Cause of transmission, for e.g. negative confirm UNKNOWN_TYPE_ID(44),
+     *            UNKNOWN_CAUSE_OF_TRANSMISSION(45), UNKNOWN_COMMON_ADDRESS_OF_ASDU(46) and
+     *            UNKNOWN_INFORMATION_OBJECT_ADDRESS(47)
+     * @throws IOException
+     *             if a fatal communication error occurred.
+     */
+    public void sendConfirmation(ASdu aSdu, int stationAddress, boolean isNegativeConfirm, CauseOfTransmission cot)
+            throws IOException {
+        sendActDect(aSdu, stationAddress, cot, isNegativeConfirm);
+    }
+
+    /**
+     * Send activation termination with given aSdu. Given station address is used as Common ASDU Address, if we response
+     * to broadcast else given Common ASDU Address of aSdu.
+     * 
+     * @param aSdu
+     *            ASDU which response to
+     * @param stationAddress
+     *            address of this station
+     * @throws IOException
+     *             if a fatal communication error occurred.
+     */
+    public void sendActivationTermination(ASdu aSdu, int stationAddress) throws IOException {
+        sendActDect(aSdu, stationAddress, CauseOfTransmission.ACTIVATION_TERMINATION, aSdu.isNegativeConfirm());
+    }
+
+    /**
+     * Send activation termination with given aSdu. Common ASDU address of given ASDU is used as station address.
+     * 
+     * @param aSdu
+     *            ASDU which response to
+     * @throws IOException
+     *             if a fatal communication error occurred.
+     */
+    public void sendActivationTermination(ASdu aSdu) throws IOException {
+        sendActivationTermination(aSdu, aSdu.getCommonAddress());
+    }
+
+    private void sendActDect(ASdu aSdu, int stationAddress, CauseOfTransmission cot, boolean isNegativeConfirm)
+            throws IOException {
+        int commonAddress = aSdu.getCommonAddress();
+
+        commonAddress = setCommonAddress(stationAddress, commonAddress);
+
+        send(new ASdu(aSdu.getTypeIdentification(), aSdu.isSequenceOfElements(), cot, aSdu.isTestFrame(),
+                isNegativeConfirm, aSdu.getOriginatorAddress(), commonAddress, aSdu.getInformationObjects()));
+    }
+
+    private int setCommonAddress(int stationAddress, int commonAddress) {
+        int broadcastAddress;
         if (settings.getCommonAddressFieldLength() == 2) {
             broadcastAddress = 65535;
         }
@@ -778,18 +880,19 @@ public class Connection implements AutoCloseable {
         if (commonAddress == broadcastAddress) {
             commonAddress = stationAddress;
         }
-
-        send(new ASdu(aSdu.getTypeIdentification(), aSdu.isSequenceOfElements(), cot, aSdu.isTestFrame(),
-                aSdu.isNegativeConfirm(), aSdu.getOriginatorAddress(), commonAddress, aSdu.getInformationObjects()));
+        return commonAddress;
     }
 
     private CauseOfTransmission cotFrom(ASdu aSdu) {
         CauseOfTransmission cot = aSdu.getCauseOfTransmission();
-        return switch (cot) {
-            case ACTIVATION -> CauseOfTransmission.ACTIVATION_CON;
-            case DEACTIVATION -> CauseOfTransmission.DEACTIVATION_CON;
-            default -> cot;
-        };
+        switch (cot) {
+        case ACTIVATION:
+            return CauseOfTransmission.ACTIVATION_CON;
+        case DEACTIVATION:
+            return CauseOfTransmission.DEACTIVATION_CON;
+        default:
+            return cot;
+        }
     }
 
     /**
@@ -1424,8 +1527,60 @@ public class Connection implements AutoCloseable {
         send(aSdu);
     }
 
-    public String getServerInformation(){
-        return socket.getInetAddress().toString() + ":" + socket.getPort();
+    /**
+     * @see Socket#getInetAddress()
+     * 
+     * @return the remote IP address to which the used socket is connected, or null if the socket is not connected.
+     */
+    public InetAddress getRemoteInetAddress() {
+        return socket.getInetAddress();
+    }
+
+    /**
+     * @see Socket#getLocalAddress()
+     * 
+     * @return the local address to which the used socket is bound, the loopback address if denied by the security
+     *         manager, or the wildcard address if the socket is closed or not bound yet.
+     */
+    public InetAddress getLocalAddress() {
+        return socket.getLocalAddress();
+    }
+
+    /**
+     * @see Socket#getRemoteSocketAddress()
+     * 
+     * @return a SocketAddress representing the remote endpoint of the used socket, or null if it is not connected yet.
+     */
+    public SocketAddress getRemoteSocketAddress() {
+        return socket.getRemoteSocketAddress();
+    }
+
+    /**
+     * @see Socket#getLocalSocketAddress()
+     * 
+     * @return a SocketAddress representing the local endpoint of the used socket, or a SocketAddress representing the
+     *         loopback address if denied by the security manager, or null if the socket is not bound yet.
+     */
+    public SocketAddress getLocalSocketAddress() {
+        return socket.getLocalSocketAddress();
+    }
+
+    /**
+     * @see int java.net.Socket.getPort()
+     * 
+     * @return the remote port number to which this socket is connected, or 0 if the socket is not connected yet.
+     */
+    public int getPort() {
+        return socket.getPort();
+    }
+
+    /**
+     * @see Socket#getLocalPort()
+     * 
+     * @return the local port number to which the used socket is bound or -1 if the socket is not bound yet.
+     */
+    public int getLocalPort() {
+        return socket.getLocalPort();
     }
 
 }

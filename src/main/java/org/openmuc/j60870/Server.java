@@ -22,6 +22,7 @@ package org.openmuc.j60870;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -39,6 +40,7 @@ public class Server {
     private final int backlog;
     private final ServerSocketFactory serverSocketFactory;
     private final int maxConnections;
+    private final List<String> allowedClientIps;
 
     private final ConnectionSettings settings;
 
@@ -50,6 +52,7 @@ public class Server {
         backlog = builder.backlog;
         serverSocketFactory = builder.serverSocketFactory;
         maxConnections = builder.maxConnections;
+        allowedClientIps = builder.allowedClientIps;
         settings = new ConnectionSettings(builder.settings);
     }
 
@@ -59,12 +62,12 @@ public class Server {
 
     /**
      * Starts a new thread that listens on the configured port. This method is non-blocking.
-     * 
+     *
      * @param listener
      *            the ServerConnectionListener that will be notified when remote clients are connecting or the server
      *            stopped listening.
      * @throws IOException
-     *             if any kind of error occures while creating the server socket.
+     *             if any kind of error occurs while creating the server socket.
      */
     public void start(ServerEventListener listener) throws IOException {
         ConnectionSettings.incremntConnectionsCounter();
@@ -75,7 +78,7 @@ public class Server {
             this.exec = Executors.newCachedThreadPool();
         }
         serverThread = new ServerThread(serverSocketFactory.createServerSocket(port, backlog, bindAddr), settings,
-                maxConnections, listener, exec);
+                maxConnections, listener, exec, allowedClientIps);
         this.exec.execute(this.serverThread);
     }
 
@@ -101,7 +104,7 @@ public class Server {
 
     /**
      * The server builder which builds a 60870 server instance.
-     * 
+     *
      * @see Server#builder()
      */
     public static class Builder extends CommonBuilder<Builder, Server> {
@@ -110,6 +113,7 @@ public class Server {
         private InetAddress bindAddr = null;
         private int backlog = 0;
         private ServerSocketFactory serverSocketFactory = ServerSocketFactory.getDefault();
+        private List<String> allowedClientIps = null;
 
         private int maxConnections = 100;
 
@@ -118,7 +122,7 @@ public class Server {
 
         /**
          * Sets the TCP port that the server will listen on. IEC 60870-5-104 usually uses port 2404.
-         * 
+         *
          * @param port
          *            the port
          * @return this builder
@@ -130,7 +134,7 @@ public class Server {
 
         /**
          * Sets the backlog that is passed to the java.net.ServerSocket.
-         * 
+         *
          * @param backlog
          *            the backlog
          * @return this builder
@@ -142,7 +146,7 @@ public class Server {
 
         /**
          * Sets the IP address to bind to. It is passed to java.net.ServerSocket
-         * 
+         *
          * @param bindAddr
          *            the IP address to bind to
          * @return this builder
@@ -155,7 +159,7 @@ public class Server {
         /**
          * Sets the ServerSocketFactory to be used to create the ServerSocket. Default is
          * ServerSocketFactory.getDefault().
-         * 
+         *
          * @param socketFactory
          *            the ServerSocketFactory to be used to create the ServerSocket
          * @return this builder
@@ -167,7 +171,7 @@ public class Server {
 
         /**
          * Set the maximum number of client connections that are allowed in parallel.
-         * 
+         *
          * @param maxConnections
          *            the number of connections allowed (default is 100) @ return this builder
          * @return this builder
@@ -177,6 +181,19 @@ public class Server {
                 throw new IllegalArgumentException("maxConnections is out of bound");
             }
             this.maxConnections = maxConnections;
+            return this;
+        }
+
+        /**
+         * Set the IPs from which clients may connect. Pass {@code null} to allow all clients. By default all clients
+         * are allowed to connect.
+         *
+         * @param allowedClientIps
+         *            the allowed client IPs
+         * @return this builder
+         */
+        public Builder setAllowedClients(List<String> allowedClientIps) {
+            this.allowedClientIps = allowedClientIps;
             return this;
         }
 

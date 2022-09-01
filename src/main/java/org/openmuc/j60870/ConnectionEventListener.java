@@ -50,4 +50,12 @@ public interface ConnectionEventListener extends EventListener {
      */
     void connectionClosed(IOException cause);
 
+    /**
+     * Informs when the state of data transfer changed.
+     * 
+     * @param stopped
+     *            true if data transfer stopped, false if data transfer started
+     */
+    void dataTransferStateChanged(boolean stopped);
+
 }

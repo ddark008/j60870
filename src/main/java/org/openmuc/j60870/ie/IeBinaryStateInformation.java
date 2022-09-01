@@ -24,7 +24,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-import javax.xml.bind.DatatypeConverter;
+import org.openmuc.j60870.internal.HexUtils;
 
 /**
  * Represents a binary state information (BSI) information element.
@@ -118,7 +118,7 @@ public class IeBinaryStateInformation extends InformationElement implements Stre
 
     @Override
     public String toString() {
-        return "BinaryStateInformation (32 bits as hex): " + DatatypeConverter.printHexBinary(
+        return "BinaryStateInformation (32 bits as hex): " + HexUtils.bytesToHex(
                 new byte[] { (byte) (value >> 24), (byte) (value >> 16), (byte) (value >> 8), (byte) (value) });
     }
 

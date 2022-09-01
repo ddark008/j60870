@@ -22,12 +22,10 @@ package org.openmuc.j60870;
 
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.Arrays;
-
-import javax.xml.bind.DatatypeConverter;
 
 import org.openmuc.j60870.ie.InformationObject;
 import org.openmuc.j60870.internal.ExtendedDataInputStream;
+import org.openmuc.j60870.internal.HexUtils;
 
 /**
  * The application service data unit (ASDU). The ASDU is the payload of the application protocol data unit (APDU). Its
@@ -345,7 +343,7 @@ public class ASdu implements Cloneable {
         }
         else {
             builder.append("\nPrivate Information:\n");
-            builder.append(DatatypeConverter.printHexBinary(this.privateInformation));
+            builder.append(HexUtils.bytesToHex(this.privateInformation));
         }
 
         return builder.toString();

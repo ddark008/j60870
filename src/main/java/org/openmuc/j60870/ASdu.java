@@ -22,6 +22,7 @@ package org.openmuc.j60870;
 
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.Arrays;
 
 import org.openmuc.j60870.ie.InformationObject;
 import org.openmuc.j60870.internal.ExtendedDataInputStream;

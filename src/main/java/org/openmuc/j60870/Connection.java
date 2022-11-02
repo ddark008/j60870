@@ -297,7 +297,7 @@ public class Connection implements AutoCloseable {
             synchronized (this) {
                 os.write(STOPDT_CON_BUFFER);
 
-                setStopped(true);
+                setExternalStopped(true);
                 if (aSduListener != null) {
                     aSduListenerBack = aSduListener;
                     aSduListener = null;
@@ -314,7 +314,7 @@ public class Connection implements AutoCloseable {
                 if (aSduListener == null) {
                     aSduListener = aSduListenerBack;
                 }
-                setStopped(false);
+                setExternalStopped(false);
             }
             os.flush();
 
@@ -328,12 +328,9 @@ public class Connection implements AutoCloseable {
             handleReceiveSequenceNumber(aPdu.getReceiveSeqNumber());
 
             if (aSduListener != null) {
-                serialExecutor.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        Thread.currentThread().setName("aSduListener");
-                        aSduListener.newASdu(aPdu.getASdu());
-                    }
+                serialExecutor.execute(() -> {
+                    Thread.currentThread().setName("aSduListener");
+                    aSduListener.newASdu(aPdu.getASdu());
                 });
             }
 
@@ -476,6 +473,13 @@ public class Connection implements AutoCloseable {
         if (aSduListener != null) {
             this.aSduListener.dataTransferStateChanged(stopped);
         }
+    }
+
+    private void setExternalStopped(boolean stopped) {
+        if (aSduListener != null) {
+            this.aSduListener.externalDataTransferStateChanged(stopped);
+        }
+        this.setStopped(stopped);
     }
 
     /**
@@ -885,14 +889,11 @@ public class Connection implements AutoCloseable {
 
     private CauseOfTransmission cotFrom(ASdu aSdu) {
         CauseOfTransmission cot = aSdu.getCauseOfTransmission();
-        switch (cot) {
-        case ACTIVATION:
-            return CauseOfTransmission.ACTIVATION_CON;
-        case DEACTIVATION:
-            return CauseOfTransmission.DEACTIVATION_CON;
-        default:
-            return cot;
-        }
+        return switch (cot) {
+            case ACTIVATION -> CauseOfTransmission.ACTIVATION_CON;
+            case DEACTIVATION -> CauseOfTransmission.DEACTIVATION_CON;
+            default -> cot;
+        };
     }
 
     /**

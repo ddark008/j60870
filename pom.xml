@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.openmuc</groupId>
   <artifactId>j60870</artifactId>
-  <version>1.5.0-ntcees</version>
+  <version>1.5.1-ntcees</version>
   <properties>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>

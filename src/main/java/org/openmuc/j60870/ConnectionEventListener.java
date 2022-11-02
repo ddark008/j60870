@@ -58,4 +58,11 @@ public interface ConnectionEventListener extends EventListener {
      */
     void dataTransferStateChanged(boolean stopped);
 
+    /**
+     * Informs when the state of data transfer changed by remote side.
+     *
+     * @param stopped
+     *            true if data transfer stopped, false if data transfer started
+     */
+    void externalDataTransferStateChanged(boolean stopped);
 }

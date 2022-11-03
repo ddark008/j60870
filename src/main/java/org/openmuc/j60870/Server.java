@@ -20,11 +20,12 @@
  */
 package org.openmuc.j60870;
 
+import org.openmuc.j60870.concurent.MDCExecutors;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.net.ServerSocketFactory;
 
@@ -75,7 +76,7 @@ public class Server {
             this.exec = ConnectionSettings.getThreadPool();
         }
         else {
-            this.exec = Executors.newCachedThreadPool();
+            this.exec = MDCExecutors.newCachedThreadPool();
         }
         serverThread = new ServerThread(serverSocketFactory.createServerSocket(port, backlog, bindAddr), settings,
                 maxConnections, listener, exec, allowedClientIps);

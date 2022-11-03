@@ -31,10 +31,10 @@ import java.net.SocketAddress;
 import java.text.MessageFormat;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.openmuc.j60870.APdu.ApciType;
+import org.openmuc.j60870.concurent.MDCExecutors;
 import org.openmuc.j60870.ie.IeAckFileOrSectionQualifier;
 import org.openmuc.j60870.ie.IeBinaryStateInformation;
 import org.openmuc.j60870.ie.IeChecksum;
@@ -428,7 +428,7 @@ public class Connection implements AutoCloseable {
             this.executor = ConnectionSettings.getThreadPool();
         }
         else {
-            this.executor = Executors.newCachedThreadPool();
+            this.executor = MDCExecutors.newCachedThreadPool();
         }
         serialExecutor = new SerialExecutor(executor);
         ConnectionSettings.incremntConnectionsCounter();

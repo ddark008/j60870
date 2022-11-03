@@ -3,10 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.openmuc</groupId>
   <artifactId>j60870</artifactId>
-  <version>1.5.1-ntcees</version>
+  <version>1.5.2-ntcees</version>
   <properties>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
+    <slf4j.version>2.0.0</slf4j.version>
   </properties>
   <name>j60870</name>
   <description>j60870 is an IEC 60870-5-104 client and server library.</description>
@@ -28,6 +29,13 @@
     <connection>none</connection>
     <url>none</url>
   </scm>
+  <dependencies>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+  </dependencies>
   <build>
     <plugins>
       <plugin>

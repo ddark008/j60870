@@ -20,15 +20,16 @@
  */
 package org.openmuc.j60870;
 
+import org.openmuc.j60870.concurent.MDCExecutors;
+
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 class ConnectionSettings {
     private static final ExecutorService threadPool;
     private static volatile int numOpenConnections;
 
     static {
-        threadPool = Executors.newCachedThreadPool();
+        threadPool = MDCExecutors.newCachedThreadPool();
         numOpenConnections = 0;
     }
 

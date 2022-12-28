@@ -477,10 +477,10 @@ public class Connection implements AutoCloseable {
     }
 
     private void setExternalStopped(boolean stopped) {
+        this.setStopped(stopped);
         if (aSduListener != null) {
             this.aSduListener.externalDataTransferStateChanged(stopped);
         }
-        this.setStopped(stopped);
     }
 
     /**

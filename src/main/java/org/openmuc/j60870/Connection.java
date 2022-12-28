@@ -35,6 +35,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.openmuc.j60870.APdu.ApciType;
 import org.openmuc.j60870.concurent.MDCExecutors;
+import org.openmuc.j60870.concurent.MDCWrappers;
 import org.openmuc.j60870.ie.IeAckFileOrSectionQualifier;
 import org.openmuc.j60870.ie.IeBinaryStateInformation;
 import org.openmuc.j60870.ie.IeChecksum;
@@ -417,7 +418,7 @@ public class Connection implements AutoCloseable {
         }
 
         ConnectionReader connectionReader = new ConnectionReader();
-        connectionReader.start();
+        new Thread(MDCWrappers.wrap(connectionReader)).start();
 
         this.maxTimeNoTestConReceived = new MaxTimeNoAckReceivedTimer();
         this.maxTimeNoAckReceived = new MaxTimeNoAckReceivedTimer();

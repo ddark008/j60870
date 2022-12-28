@@ -312,10 +312,10 @@ public class Connection implements AutoCloseable {
             synchronized (this) {
                 os.write(STARTDT_CON_BUFFER, 0, STARTDT_CON_BUFFER.length);
 
+                setExternalStopped(false);
                 if (aSduListener == null) {
                     aSduListener = aSduListenerBack;
                 }
-                setExternalStopped(false);
             }
             os.flush();
 

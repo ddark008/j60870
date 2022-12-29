@@ -188,8 +188,8 @@ public class Connection implements AutoCloseable {
                     return;
                 }
                 close();
-                if (aSduListener != null) {
-                    aSduListener.connectionClosed(new IOException(
+                if (getASduListener() != null) {
+                    getASduListener().connectionClosed(new IOException(
                             "The maximum time that no confirmation was received (t1) has been exceeded. t1 = "
                                     + settings.getMaxTimeNoAckReceived() + "ms"));
                 }
@@ -260,8 +260,8 @@ public class Connection implements AutoCloseable {
                 synchronized (Connection.this) {
                     if (!closed) {
                         close();
-                        if (aSduListener != null) {
-                            aSduListener.connectionClosed(closedIOException);
+                        if (getASduListener() != null) {
+                            getASduListener().connectionClosed(closedIOException);
                         }
                     }
                     closeThreadPool();
@@ -312,10 +312,10 @@ public class Connection implements AutoCloseable {
             synchronized (this) {
                 os.write(STARTDT_CON_BUFFER, 0, STARTDT_CON_BUFFER.length);
 
-                setExternalStopped(false);
                 if (aSduListener == null) {
                     aSduListener = aSduListenerBack;
                 }
+                setExternalStopped(false);
             }
             os.flush();
 
@@ -436,6 +436,10 @@ public class Connection implements AutoCloseable {
 
         this.timeoutManager = new TimeoutManager();
         this.executor.execute(this.timeoutManager);
+    }
+
+    protected ConnectionEventListener getASduListener(){
+        return aSduListener != null ? aSduListener : aSduListenerBack;
     }
 
     /**
